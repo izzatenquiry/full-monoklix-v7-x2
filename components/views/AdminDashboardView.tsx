@@ -234,8 +234,8 @@ const AdminDashboardView: React.FC = () => {
             const aLastSeen = a.lastSeenAt ? new Date(a.lastSeenAt).getTime() : 0;
             const bLastSeen = b.lastSeenAt ? new Date(b.lastSeenAt).getTime() : 0;
 
-            const aIsOnline = aLastSeen > 0 && (now - aLastSeen) < 2 * 60 * 1000;
-            const bIsOnline = bLastSeen > 0 && (now - bLastSeen) < 2 * 60 * 1000;
+            const aIsOnline = aLastSeen > 0 && (now - aLastSeen) < 60 * 60 * 1000;
+            const bIsOnline = bLastSeen > 0 && (now - bLastSeen) < 60 * 60 * 1000;
 
             if (aIsOnline && !bIsOnline) return -1;
             if (!aIsOnline && bIsOnline) return 1;
@@ -244,6 +244,15 @@ const AdminDashboardView: React.FC = () => {
         });
     }, [users, searchTerm]);
     
+    const activeUsersCount = useMemo(() => {
+        if (!users) return 0;
+        const now = new Date().getTime();
+        const oneHour = 60 * 60 * 1000;
+        return users.filter(user => 
+            user.lastSeenAt && (now - new Date(user.lastSeenAt).getTime()) < oneHour
+        ).length;
+    }, [users]);
+
     if (loading) {
         return <div>Loading users...</div>;
     }
@@ -271,7 +280,14 @@ const AdminDashboardView: React.FC = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full max-w-sm bg-white dark:bg-neutral-800/50 border border-neutral-300 dark:border-neutral-700 rounded-lg p-2 focus:ring-2 focus:ring-primary-500 focus:outline-none transition"
                     />
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-sm bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 font-semibold py-2 px-3 rounded-lg">
+                            <span className="relative flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                            <span>{activeUsersCount} Active Users</span>
+                        </div>
                          <button onClick={() => { setUserForHealthCheck(null); setIsHealthModalOpen(true); }} className="flex items-center gap-2 text-sm bg-blue-600 text-white font-semibold py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors">
                             <CheckCircleIcon className="w-4 h-4" />
                             API Health Summary
@@ -336,7 +352,7 @@ const AdminDashboardView: React.FC = () => {
                                         if (user.lastSeenAt) {
                                             const lastSeenDate = new Date(user.lastSeenAt);
                                             const diffMinutes = (new Date().getTime() - lastSeenDate.getTime()) / (1000 * 60);
-                                            if (diffMinutes < 2) {
+                                            if (diffMinutes < 60) {
                                                 activeInfo = { text: 'Active now', color: 'green', fullDate: lastSeenDate.toLocaleString() };
                                             } else {
                                                 activeInfo = { text: getTimeAgo(lastSeenDate), color: 'gray', fullDate: lastSeenDate.toLocaleString() };

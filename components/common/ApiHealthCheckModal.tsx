@@ -95,6 +95,18 @@ const ApiHealthCheckModal: React.FC<ApiHealthCheckModalProps> = ({ isOpen, onClo
                                         <div className="flex justify-between"><span>Username:</span> <span className="font-medium">{user.username}</span></div>
                                         <div className="flex justify-between"><span>Email:</span> <span className="font-medium">{user.email}</span></div>
                                         <div className="flex justify-between"><span>Status:</span> <span className="font-semibold capitalize">{user.status}</span></div>
+                                        <div className="flex justify-between">
+                                            <span>Last Login:</span>
+                                            <span className="font-medium">
+                                                {user.lastSeenAt ? new Date(user.lastSeenAt).toLocaleString() : 'Never'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>App Version:</span>
+                                            <span className="font-medium">
+                                                {user.appVersion || 'N/A'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
